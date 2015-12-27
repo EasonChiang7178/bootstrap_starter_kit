@@ -1,0 +1,21 @@
+{
+  "name": "bootstrap_starter_kit",
+  "description": "Start your Bootstrap project from here!",
+  "main": "index.js",
+  "authors": [
+    "EasonChiange7178 <ishiu.chiang@gmail.com>"
+  ],
+  "license": "ISC",
+  "moduleType": [
+    "es6"
+  ],
+  "homepage": "",
+  "private": true,
+  "dependencies": {
+    "bootstrap": "~3.3.6",
+    "font-awesome": "fontawesome#~4.5.0"
+  },
+  "devDependencies": {
+    "bootstrap-sass": "~3.3.6"
+  }
+}
