@@ -18,6 +18,11 @@ var gulp         = require('gulp'),
     del          = require('del'),
     runSequence  = require('run-sequence');
 
+  // the name of the directory that stores our sources
+var src_root = 'app';
+  // use customized Bootstrap scss files?
+var useBootstrapSASS = true;
+
 /* paths of the bower components, using glob representaion */ 
 var bowerDir = './bower_components',
     bowerPath = {
@@ -29,36 +34,36 @@ var bowerDir = './bower_components',
       BOOTSTRAP_SASS:  bowerDir + '/bootstrap-sass/assets/stylesheets',
       BOOTSTRAP_FONTS: bowerDir + '/bootstrap-sass/assets/fonts/**/*'
 };
-  // the name of the directory that stores our sources
-var src_root = 'app';
 
 /* path of source files and output directory */
 var path = {
-  HTML:        './' + src_root + '/*.html',
-  JS:          ['./' + src_root + '/js/**/*.js', './' + src_root + '/js/*.js'].concat(
-                bowerPath.JQUERY_JS,
-                bowerPath.BOOTSTRAP_JS
-               ),
-  CSS:         ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'].concat(
-                bowerPath.BOOTSTRAP_CSS
-               ),
-  CSS_NO_BS:   ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'],
-  SASS_SRC:    ['./' + src_root + '/sass/**/*.scss', './' + src_root + '/sass/*.scss'].concat(
-                bowerPath.BOOTSTRAP_SASS + '/**/*.scss'
-               ),
-  SASS_PATH:   ['./' + src_root + '/sass', './' + src_root + '/sass/**/'].concat(
-                bowerPath.BOOTSTRAP_SASS,
-                bowerPath.BOOTSTRAP_SASS + '/bootstrap'
-               ),
-  SASS_OUTPUT: './' + src_root + '/css/sass_output',
-  FONTS:       ['./' + src_root + '/fonts'].concat(
-                bowerPath.BOOTSTRAP_FONTS
-               ),
-  DEST:        'dist',
-  OUT_JS:      'build.js',
-  OUT_CSS:     'build.css',
-  OUT_MIN_JS:  'build.min.js',
-  OUT_MIN_CSS: 'build.min.css'
+  HTML:            './' + src_root + '/*.html',
+  JS:              ['./' + src_root + '/js/**/*.js', './' + src_root + '/js/*.js'].concat(
+                    bowerPath.JQUERY_JS,
+                    bowerPath.BOOTSTRAP_JS
+                   ),
+  CSS:             ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'].concat(
+                    bowerPath.BOOTSTRAP_CSS
+                   ),
+  CSS_NO_BS:       ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'],
+  SASS_SRC:        ['./' + src_root + '/sass/**/*.scss', './' + src_root + '/sass/*.scss'].concat(
+                    bowerPath.BOOTSTRAP_SASS + '/**/*.scss'
+                   ), // path for the sources of scss files, includes bootstrap-sass
+  SASS_NO_BS_SRC:  ['./' + src_root + '/sass/**/*.scss', './' + src_root + '/sass/*.scss'],
+  SASS_PATH:       ['./' + src_root + '/sass', './' + src_root + '/sass/**/'].concat(
+                    bowerPath.BOOTSTRAP_SASS,
+                    bowerPath.BOOTSTRAP_SASS + '/bootstrap'
+                   ), // path for include path of the sass, includes bootstrap-sass
+  SASS_NO_BS_PATH: ['./' + src_root + '/sass', './' + src_root + '/sass/**/'],
+  SASS_OUTPUT:     './' + src_root + '/css/sass_output',
+  FONTS:           ['./' + src_root + '/fonts'].concat(
+                    bowerPath.BOOTSTRAP_FONTS
+                   ),
+  DEST:            'dist',
+  OUT_JS:          'build.js',
+  OUT_CSS:         'build.css',
+  OUT_MIN_JS:      'build.min.js',
+  OUT_MIN_CSS:     'build.min.css'
 };
 
 path.ALL_SRC  = [path.HTML].concat(path.JS, path.CSS, path.SASS);
@@ -77,24 +82,23 @@ gulp.task('fonts', function() {
 
 /* compile sass files, prefixer them into dist folder */
 gulp.task('sass', function() {
-  return gulp.src(path.SASS_SRC)
+  return gulp.src(useBootstrapSASS ? path.SASS_SRC : path.SASS_NO_BS_PATH)
           .pipe(sourcemaps.init())
             .pipe(sass({
               precision: 10,
-              includePaths: path.SASS_PATH
+              includePaths: useBootstrapSASS ? path.SASS_PATH : path.SASS_NO_BS_PATH
             }).on('error', sass.logError))
             .pipe(autoprefixer('last 5 version', 'ie 8', 'ie 9'))
-            .pipe(concat(path.OUT_CSS))
           .pipe(sourcemaps.write('./'))
-          .pipe(gulp.dest(path.DEST + '/css/'));
+          .pipe(gulp.dest(path.SASS_OUTPUT));
 });
 
 /* concat all of css files and generate its sourcemaps */
 gulp.task('concat-css', function() {
-  return gulp.src(path.CSS)
-          .pipe(sourcemaps.init())
+  return gulp.src(useBootstrapSASS ? path.CSS_NO_BS : path.CSS)
+          .pipe(sourcemaps.init({loadMaps: true}))
             .pipe(concat(path.OUT_CSS))
-          .pipe(sourcemaps.write('.'))
+          .pipe(sourcemaps.write('./'))
           .pipe(gulp.dest(path.DEST + '/css/'));
 });
 
@@ -103,7 +107,7 @@ gulp.task('concat-js', function() {
   return gulp.src(path.JS)
           .pipe(sourcemaps.init())
             .pipe(concat(path.OUT_JS))
-          .pipe(sourcemaps.write('.'))
+          .pipe(sourcemaps.write('./'))
           .pipe(gulp.dest(path.DEST + '/js/'));
 });
 
@@ -149,7 +153,7 @@ gulp.task('watch', function() {
     gulp.start('concat-js', done);
   }));
     // for css sources
-  watch(path.CSS, batch(function(events, done) {
+  watch(useBootstrapSASS ? path.CSS_NO_BS : path.CSS, batch(function(events, done) {
     gulp.start('concat-css', done);
   }));
     // for sass sources
@@ -180,7 +184,7 @@ gulp.task('livereload', function() {
 gulp.task('setup', ['concat-js', 'sass', 'replace-html', 'fonts']);
 
 gulp.task('develop', function() {
-  runSequence('setup', 'webserver', 'watch', 'livereload');
+  runSequence('setup', 'concat-css', 'webserver', 'watch', 'livereload');
 });
 
 gulp.task('default', ['develop']);
@@ -192,7 +196,7 @@ gulp.task('default', ['develop']);
 
 /* clean all of the outputed files and directory */
 gulp.task('clean', function(cb) {
-  return del([path.DEST], cb);
+  return del([path.DEST, path.SASS_OUTPUT], cb);
 });
 
 /* uglify the concated js files */
@@ -237,5 +241,5 @@ gulp.task('build', ['uglify-js', 'minify-css', 'replace-minify-html', 'fonts'], 
 });
 
 gulp.task('release', function() {
-  runSequence('clean', 'build');
+  runSequence('clean', 'sass', 'build');
 });
