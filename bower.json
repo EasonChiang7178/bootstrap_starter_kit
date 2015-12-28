@@ -13,7 +13,8 @@
   "private": true,
   "dependencies": {
     "bootstrap": "~3.3.6",
-    "font-awesome": "fontawesome#~4.5.0"
+    "font-awesome": "fontawesome#~4.5.0",
+    "jquery_v1": "jquery#1.11.3"
   },
   "devDependencies": {
     "bootstrap-sass": "~3.3.6"

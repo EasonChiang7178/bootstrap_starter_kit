@@ -22,6 +22,7 @@ var gulp         = require('gulp'),
 var bowerDir = './bower_components',
     bowerPath = {
       JQUERY_JS:       bowerDir + '/jquery/dist/jquery.min.js',
+      JQUERY_JS_v1:    bowerDir + '/jquery_v1/dist/jquery.min.js',
       BOOTSTRAP_JS:    bowerDir + '/bootstrap/dist/js/bootstrap.min.js',
       BOOTSTRAP_CSS:  [bowerDir + '/bootstrap/dist/css/bootstrap.min.css',
                        bowerDir + '/bootstrap/dist/css/bootstrap-theme.min.css'],
@@ -41,6 +42,7 @@ var path = {
   CSS:         ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'].concat(
                 bowerPath.BOOTSTRAP_CSS
                ),
+  CSS_NO_BS:   ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'],
   SASS_SRC:    ['./' + src_root + '/sass/**/*.scss', './' + src_root + '/sass/*.scss'].concat(
                 bowerPath.BOOTSTRAP_SASS + '/**/*.scss'
                ),
@@ -48,6 +50,7 @@ var path = {
                 bowerPath.BOOTSTRAP_SASS,
                 bowerPath.BOOTSTRAP_SASS + '/bootstrap'
                ),
+  SASS_OUTPUT: './' + src_root + '/css/sass_output',
   FONTS:       ['./' + src_root + '/fonts'].concat(
                 bowerPath.BOOTSTRAP_FONTS
                ),
@@ -66,6 +69,12 @@ path.ALL_DIST = [path.DEST + '/**'].concat(path.DEST + '/css/**', path.DEST + '/
 /*                           develop configuration                            */
 /* -------------------------------------------------------------------------- */
 
+/* copy the fonts to the dist folder */
+gulp.task('fonts', function() {
+  return gulp.src(path.FONTS)
+          .pipe(gulp.dest(path.DEST + '/fonts/'));
+});
+
 /* compile sass files, prefixer them into dist folder */
 gulp.task('sass', function() {
   return gulp.src(path.SASS_SRC)
@@ -78,12 +87,6 @@ gulp.task('sass', function() {
             .pipe(concat(path.OUT_CSS))
           .pipe(sourcemaps.write('./'))
           .pipe(gulp.dest(path.DEST + '/css/'));
-});
-
-/* copy the fonts to the dist folder */
-gulp.task('fonts', function() {
-  return gulp.src(path.FONTS)
-          .pipe(gulp.dest(path.DEST + '/fonts/'));
 });
 
 /* concat all of css files and generate its sourcemaps */
