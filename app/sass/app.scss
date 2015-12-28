@@ -1,0 +1,7 @@
+@import "bootstrap";
+@import "bootstrap/theme";
+
+$primary-color: red;
+body {
+  background-color: $primary-color;
+}
