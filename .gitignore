@@ -31,3 +31,6 @@ bower_components
 
 # Directory for the built destination
 dist
+
+# Default path to the output directory of SASS
+app/css/sass_output

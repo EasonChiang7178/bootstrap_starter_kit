@@ -21,7 +21,7 @@ var gulp         = require('gulp'),
   // the name of the directory that stores our sources
 var src_root = 'app';
   // use customized Bootstrap scss files?
-var useBootstrapSASS = true;
+var useBootstrapSASS = false;
 
 /* paths of the bower components, using glob representaion */ 
 var bowerDir = './bower_components',
@@ -42,8 +42,9 @@ var path = {
                     bowerPath.JQUERY_JS,
                     bowerPath.BOOTSTRAP_JS
                    ),
-  CSS:             ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'].concat(
-                    bowerPath.BOOTSTRAP_CSS
+  CSS:             bowerPath.BOOTSTRAP_CSS.concat(
+                    './' + src_root + '/css/**/*.css',
+                    './' + src_root + '/css/*.css'
                    ),
   CSS_NO_BS:       ['./' + src_root + '/css/**/*.css', './' + src_root + '/css/*.css'],
   SASS_SRC:        ['./' + src_root + '/sass/**/*.scss', './' + src_root + '/sass/*.scss'].concat(
@@ -82,7 +83,7 @@ gulp.task('fonts', function() {
 
 /* compile sass files, prefixer them into dist folder */
 gulp.task('sass', function() {
-  return gulp.src(useBootstrapSASS ? path.SASS_SRC : path.SASS_NO_BS_PATH)
+  return gulp.src(useBootstrapSASS ? path.SASS_SRC : path.SASS_NO_BS_SRC)
           .pipe(sourcemaps.init())
             .pipe(sass({
               precision: 10,
