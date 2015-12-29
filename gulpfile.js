@@ -28,6 +28,8 @@ var bowerDir = './bower_components',
     bowerPath = {
       JQUERY_JS:       bowerDir + '/jquery/dist/jquery.min.js',
       JQUERY_JS_v1:    bowerDir + '/jquery_v1/dist/jquery.min.js',
+      RESPONDJS:       bowerDir + '/respond/dest/respond.min.js',
+      HTML5SHIV:       bowerDir + '/html5shiv/dist/html5shiv.min.js',
       BOOTSTRAP_JS:    bowerDir + '/bootstrap/dist/js/bootstrap.min.js',
       BOOTSTRAP_CSS:  [bowerDir + '/bootstrap/dist/css/bootstrap.min.css',
                        bowerDir + '/bootstrap/dist/css/bootstrap-theme.min.css'],
@@ -60,6 +62,7 @@ var path = {
   FONTS:           ['./' + src_root + '/fonts'].concat(
                     bowerPath.BOOTSTRAP_FONTS
                    ),
+  IE8_SUPPORT:     [bowerPath.RESPONDJS, bowerPath.HTML5SHIV],
   DEST:            'dist',
   OUT_JS:          'build.js',
   OUT_CSS:         'build.css',
@@ -79,6 +82,12 @@ path.ALL_DIST = [path.DEST + '/**'].concat(path.DEST + '/css/**', path.DEST + '/
 gulp.task('fonts', function() {
   return gulp.src(path.FONTS)
           .pipe(gulp.dest(path.DEST + '/fonts/'));
+});
+
+/* copy the necessary files for IE8 to the dist folder */
+gulp.task('ie8-support', function() {
+  return gulp.src(path.IE8_SUPPORT)
+          .pipe(gulp.dest(path.DEST + '/js/'));
 });
 
 /* compile sass files, prefixer them into dist folder */
@@ -142,7 +151,8 @@ gulp.task('replace-html', ['bootlint'], function() {
   return gulp.src(path.HTML)
           .pipe(htmlreplace({
             'css': 'css/' + path.OUT_CSS,
-            'js': 'js/' + path.OUT_JS
+            'js': 'js/' + path.OUT_JS,
+            'ie8': ['js/html5shiv.min.js', 'js/respond.min.js']
           }))
           .pipe(gulp.dest(path.DEST));
 });
@@ -182,7 +192,7 @@ gulp.task('livereload', function() {
     .pipe(connect.reload());
 });
 
-gulp.task('setup', ['concat-js', 'sass', 'replace-html', 'fonts']);
+gulp.task('setup', ['concat-js', 'sass', 'replace-html', 'fonts', 'ie8-support']);
 
 gulp.task('develop', function() {
   runSequence('setup', 'concat-css', 'webserver', 'watch', 'livereload');
@@ -225,19 +235,22 @@ gulp.task('replace-minify-html', ['bootlint'], function() {
   return gulp.src(path.HTML)
           .pipe(htmlreplace({
             'css': 'css/' + path.OUT_MIN_CSS,
-            'js': 'js/' + path.OUT_MIN_JS
+            'js': 'js/' + path.OUT_MIN_JS,
+            'ie8': ['js/html5shiv.min.js', 'js/respond.min.js']
           }))
           .pipe(minifyHTML())
           .pipe(gulp.dest(path.DEST));
 });
 
 /* delete all the temp files */
-gulp.task('build', ['uglify-js', 'minify-css', 'replace-minify-html', 'fonts'], function(cb) {
+gulp.task('build', ['uglify-js', 'minify-css', 'replace-minify-html', 'fonts', 'ie8-support'], function(cb) {
   return del([path.DEST + '/css/**',
               '!' + path.DEST + '/css',
               '!' + path.DEST + '/css/' + path.OUT_MIN_CSS,
               path.DEST + '/js/**',
               '!' + path.DEST + '/js',
+              '!' + path.DEST + '/js/respond.min.js',
+              '!' + path.DEST + '/js/html5shiv.min.js',
               '!' + path.DEST + '/js/' + path.OUT_MIN_JS], cb);
 });
 

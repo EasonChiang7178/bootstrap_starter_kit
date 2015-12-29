@@ -17,6 +17,8 @@
     "jquery_v1": "jquery#1.11.3"
   },
   "devDependencies": {
-    "bootstrap-sass": "~3.3.6"
+    "bootstrap-sass": "~3.3.6",
+    "html5shiv": "~3.7.3",
+    "respond": "respondJS#~1.4.2"
   }
 }
