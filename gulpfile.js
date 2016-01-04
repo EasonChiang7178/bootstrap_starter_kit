@@ -15,6 +15,7 @@ var gulp         = require('gulp'),
     bootlint     = require('gulp-bootlint'),
     sass         = require('gulp-sass'),
     autoprefixer = require('gulp-autoprefixer'),
+    imagemin     = require('gulp-imagemin');
     del          = require('del'),
     runSequence  = require('run-sequence');
 
@@ -59,6 +60,8 @@ var path = {
                    ), // path for include path of the sass, includes bootstrap-sass
   SASS_NO_BS_PATH: ['./' + src_root + '/sass', './' + src_root + '/sass/**/'],
   SASS_OUTPUT:     './' + src_root + '/css/sass_output',
+  IMAGES:          ['./' + src_root + '/images/*.jpg', './' + src_root + '/images/*.png',
+                    './' + src_root + '/images/*.jpeg'],
   FONTS:           ['./' + src_root + '/fonts'].concat(
                     bowerPath.BOOTSTRAP_FONTS
                    ),
@@ -77,6 +80,13 @@ path.ALL_DIST = [path.DEST + '/**'].concat(path.DEST + '/css/**', path.DEST + '/
 /* -------------------------------------------------------------------------- */
 /*                           develop configuration                            */
 /* -------------------------------------------------------------------------- */
+
+/* minify all the images of the website */
+gulp.task('minify-images', function() {
+  return gulp.src(path.IMAGES)
+          .pipe(imagemin({progressive: true}))
+          .pipe(gulp.dest(path.DEST + '/images/'));
+});
 
 /* copy the fonts to the dist folder */
 gulp.task('fonts', function() {
@@ -192,7 +202,7 @@ gulp.task('livereload', function() {
     .pipe(connect.reload());
 });
 
-gulp.task('setup', ['concat-js', 'sass', 'replace-html', 'fonts', 'ie8-support']);
+gulp.task('setup', ['concat-js', 'sass', 'replace-html', 'fonts', 'ie8-support', 'minify-images']);
 
 gulp.task('develop', function() {
   runSequence('setup', 'concat-css', 'webserver', 'watch', 'livereload');
@@ -243,7 +253,7 @@ gulp.task('replace-minify-html', ['bootlint'], function() {
 });
 
 /* delete all the temp files */
-gulp.task('build', ['uglify-js', 'minify-css', 'replace-minify-html', 'fonts', 'ie8-support'], function(cb) {
+gulp.task('build', ['uglify-js', 'minify-css', 'replace-minify-html', 'fonts', 'ie8-support', 'minify-images'], function(cb) {
   return del([path.DEST + '/css/**',
               '!' + path.DEST + '/css',
               '!' + path.DEST + '/css/' + path.OUT_MIN_CSS,
